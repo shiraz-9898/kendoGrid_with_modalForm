@@ -1,0 +1,168 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+}
+
+<style type="text/css">  
+    #editBtn {
+        padding: 3px 13px;
+       border: none;
+        border-radius: 50%;
+        background: lightgray;
+        font-size: 16px;
+    }
+</style>
+
+<div id="container">
+   
+    <!-- Button trigger modal -->
+    <button type="button" id="addBtn" class="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#staticBackdrop">
+        Add New Record
+    </button>   
+
+   
+    <!-- Modal -->
+    <div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="staticBackdropLabel"></h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="myForm">
+                        <label for="Name" class="form-label">Name</label>
+                        <input type="text" id="Name" class="form-control" name="Name" />
+
+                        <label for="Contact" class="form-label">Contact</label>
+                        <input type="text" id="Contact" class="form-control" name="Contact" />
+
+                        <label for="Email" class="form-label">Email</label>
+                        <input type="text" id="Email" class="form-control" name="Email" />
+
+                        <label for="Department" class="form-label">Department</label>
+                        <input type="text" id="Department" class="form-control" name="Department" />
+
+                        <label for="Salary" class="form-label">Salary</label>
+                        <input type="text" id="Salary" class="form-control" name="Salary" />
+
+                        <input type="hidden" id="Id" class="form-control" name="Id" />
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" id="saveBtn" class="btn btn-primary">Save</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="example">
+        <div id="grid"></div>
+    </div>   
+</div>
+
+<script>
+    $(document).ready(function () {
+
+        var grid = $("#grid").kendoGrid({
+            dataSource: {
+
+                transport: {
+                    read: {
+                        url: "/Home/Show",
+                        type: "json",
+                    }
+                },
+                pageSize: 20
+            },
+            height: 550,
+           
+            sortable: true,
+            pageable: {
+                refresh: true,
+                pageSizes: true,
+                buttonCount: 5
+            },
+           
+            columns: [               
+                {
+                    field: "CustomColumn", title: "Action", width: "75",
+                    template: '<button type="button" id="editBtn" class="myMenu "><i class="fa-solid fa-ellipsis-vertical"></i></button>',
+                },
+                { field: "id", title: "Employee ID" },
+                { field: "name", title: "Employee Name" },
+                { field: "contact", title: "Contact" },
+                { field: "email", title: "Email" },
+                { field: "department", title: "Department" },
+                { field: "salary", title: "Salary" },
+            ]
+        }).data("kendoGrid");
+      
+
+        $("#saveBtn").click(function () {
+            var formData = $("#myForm").serialize();
+            if (formData.id != "") {
+                url = "/Home/Edit/";
+            }
+            else {
+                url = "/Home/Create/";
+            }
+            $.ajax({
+                type: "post",
+                url: url,
+                data: formData,
+                success: function (d) {
+                    console.log(d);
+                    $("#staticBackdrop").modal("hide");
+                    grid.dataSource.read();
+                }
+            })
+        })
+
+        $("#addBtn").click(function () {
+            $(".modal-header h1").text("Add New");
+        })
+
+        $.contextMenu({            
+            selector: ".myMenu",
+            autoHide: true,
+            trigger: "left",
+            
+            // define the elements of the menu
+            items: {
+                Edit: {
+                    name: "Edit", callback: function (key, opt) {
+
+                        $(".modal-header h1").text("Edit");
+                        $("#staticBackdrop").modal("show");
+                        var gridData = grid.dataItem($(this).closest("tr"));
+                        $("#Id").val(gridData.id);
+                        $("#Name").val(gridData.name);
+                        $("#Contact").val(gridData.contact);
+                        $("#Salary").val(gridData.salary);
+                        $("#Email").val(gridData.email);
+                        $("#Department").val(gridData.department);
+                        console.log(gridData);
+
+                    }
+                },
+                Delete: {
+                    name: "Delete", callback: function (key, opt) {
+                        var gridData = grid.dataItem($(this).closest("tr"));
+                        var rowId = { userId: gridData.id };
+                        console.log(rowId);
+                        $.ajax({
+                            type: "post",
+                            url: "/Home/Delete/",
+                            data: rowId,
+                            success: function (d) {
+                                console.log(d);                                
+                                grid.dataSource.read();
+                            }
+                        })
+                    }
+                }
+            }
+        });
+    });
+</script>
