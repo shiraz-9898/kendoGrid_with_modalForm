@@ -24,19 +24,27 @@ namespace kendoGridRev.Controllers
             var data = _context.Employees.ToList();
             return Json(data);
         }
-
+        [HttpPost]
         public IActionResult Create(Employee emp)
         {
-            _context.Employees.Add(emp);
-            _context.SaveChanges();
+            if(ModelState.IsValid)
+            {
+                _context.Employees.Add(emp);
+                _context.SaveChanges();
+                return Json(emp);
+            }
             return Json(emp);
         }
 
         [HttpPost]
         public IActionResult Edit(Employee emp)
         {
-            _context.Employees.Update(emp);
-            _context.SaveChanges();
+            if (ModelState.IsValid)
+            {
+                _context.Employees.Update(emp);
+                _context.SaveChanges();
+                return Json(emp);
+            }
             return Json(emp);
         }
 
