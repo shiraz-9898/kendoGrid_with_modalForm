@@ -1,5 +1,7 @@
 using kendoGridRev.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.EntityFrameworkCore;
 using System.Diagnostics;
 
 namespace kendoGridRev.Controllers
@@ -16,35 +18,40 @@ namespace kendoGridRev.Controllers
 
         public IActionResult Index()
         {
+            ViewData["Br_Name"] = new SelectList(_context.Branches, "Br_Id", "Br_Name");
             return View();
         }
 
         public IActionResult Show()
         {
-            var data = _context.Employees.ToList();
+            var data = _context.Employees.Include(e => e.Branches).ToList();
             return Json(data);
         }
         [HttpPost]
         public IActionResult Create(Employee emp)
         {
-            if(ModelState.IsValid)
-            {
+            if (emp.Br_Id > 0)
+            {                                              
                 _context.Employees.Add(emp);
                 _context.SaveChanges();
+
                 return Json(emp);
             }
+           
             return Json(emp);
         }
 
         [HttpPost]
         public IActionResult Edit(Employee emp)
         {
-            if (ModelState.IsValid)
+            if (emp.Br_Id > 0)
             {
                 _context.Employees.Update(emp);
                 _context.SaveChanges();
+
                 return Json(emp);
             }
+
             return Json(emp);
         }
 

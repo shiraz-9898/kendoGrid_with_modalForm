@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace kendoGridRev.Models;
 
@@ -20,4 +21,8 @@ public partial class Employee
     public decimal Salary { get; set; }
     [Required]
     public decimal? Contact { get; set; }
+
+    [ForeignKey("Branches")]    
+    public int Br_Id { get; set; }
+    public Branch Branches { get; set; }
 }

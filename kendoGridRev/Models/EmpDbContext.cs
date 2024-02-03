@@ -13,6 +13,7 @@ public partial class EmpDbContext : DbContext
     }
 
     public virtual DbSet<Employee> Employees { get; set; }
+    public virtual DbSet<Branch> Branches { get; set; }
 
     
 }
